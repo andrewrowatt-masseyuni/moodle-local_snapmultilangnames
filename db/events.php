@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Upgrade script for local_snapmultilangnames.
+ * Event observer definitions for local_snapmultilangnames.
  *
  * @package    local_snapmultilangnames
  * @copyright  2026 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
@@ -24,17 +24,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Upgrade function for local_snapmultilangnames.
- *
- * @param int $oldversion
- * @return bool
- */
-function xmldb_local_snapmultilangnames_upgrade(int $oldversion): bool {
-    if ($oldversion < 2026022701) {
-        local_snapmultilangnames_create_customfield();
-        upgrade_plugin_savepoint(true, 2026022701, 'local', 'snapmultilangnames');
-    }
-
-    return true;
-}
+$observers = [
+    [
+        'eventname' => '\core\event\course_section_created',
+        'callback'  => '\local_snapmultilangnames\observer::course_section_created',
+        'internal'  => false,
+    ],
+    [
+        'eventname' => '\core\event\course_section_deleted',
+        'callback'  => '\local_snapmultilangnames\observer::course_section_deleted',
+        'internal'  => false,
+    ],
+];

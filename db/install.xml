@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/snapmultilangnames/db" VERSION="20260228" COMMENT="XMLDB file for local_snapmultilangnames"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_snapmultilangnames_sec" COMMENT="Per-section language settings for multilang names">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the course"/>
+        <FIELD NAME="sectionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID of the course_sections row"/>
+        <FIELD NAME="lang1" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="BCP47 code for name component 1, empty means auto-detect"/>
+        <FIELD NAME="lang2" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="BCP47 code for name component 2, empty means auto-detect"/>
+        <FIELD NAME="lang3" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="BCP47 code for name component 3, empty means auto-detect"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_course" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="fk_section" TYPE="foreign" FIELDS="sectionid" REFTABLE="course_sections" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="courseid_sectionid" UNIQUE="true" FIELDS="courseid, sectionid" COMMENT="One lang-settings row per section"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

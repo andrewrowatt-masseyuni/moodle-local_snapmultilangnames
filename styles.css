@@ -22,7 +22,8 @@ span.mlnc {
 
 /* Snap table of contents */
 #chapters h3 a,
-#namemultilang_preview {
+#namemultilang_preview,
+.mlnc_preview {
     span.mlnc {
         display: grid;
         grid-template-rows: min-content min-content min-content;
@@ -36,6 +37,20 @@ span.mlnc {
         span {
             text-overflow: ellipsis;
             overflow: hidden;
+
+            &[data-language]::after {
+                --tagcolor: color-mix(in srgb, currentColor 10%, white);
+                content: attr(data-language);
+                font-family: var(--font-sans);
+                font-size: 12px;
+                font-style: normal;
+                line-height: 1;
+                margin-left: 0.3em;
+                background-color: var(--tagcolor);
+                border: 1px solid var(--tagcolor);
+                border-radius: 8px;
+                padding: 3px;
+            }
         }
 
         span.n1 {

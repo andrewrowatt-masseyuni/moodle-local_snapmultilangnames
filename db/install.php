@@ -37,7 +37,7 @@ function xmldb_local_snapmultilangnames_install(): bool {
  */
 function local_snapmultilangnames_create_customfield(): void {
     $category = \core_customfield\category_controller::create(0, (object)[
-        'name'      => 'Snap Multilang Names',
+        'name'      => 'Multilang names',
         'component' => 'core_course',
         'area'      => 'course',
         'itemid'    => 0,
@@ -55,7 +55,7 @@ function local_snapmultilangnames_create_customfield(): void {
         'configdata'        => json_encode([
             'checkbydefault' => 0,
             'locked'         => 0,
-            'visibility'     => 2, // VISIBILITY_EVERYONE.
+            'visibility'     => 1, // Visible in forms and course settings, but not in the course list.
         ]),
     ], $category);
     $field->save();
