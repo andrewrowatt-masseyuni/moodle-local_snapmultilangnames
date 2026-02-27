@@ -1,0 +1,182 @@
+/* LMS0267 start */
+/* mlnc multi-language name container */
+span.mlnc {
+    --font-mi: "Georgia", serif;
+    --font-sans: Source Sans Pro, Roboto, Arial, sans-serif;
+
+    span.n3 {
+        font-style: italic;
+        font-family: var(--font-sans);
+    }
+
+    span:lang(mi) {
+        font-family: var(--font-mi);
+    }
+
+    /* Moodle converts to lower case (per the spect, H technically should be upper case) */
+    span:lang(zh),
+    span:lang(zh-hans) {
+        font-style: normal;
+    }
+}
+
+/* Snap table of contents */
+#chapters h3 a,
+#namemultilang_preview {
+    span.mlnc {
+        display: grid;
+        grid-template-rows: min-content min-content min-content;
+
+        margin: 0.3em 0;
+
+        span:not([class]) {
+            display: none;
+        }
+
+        span {
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        span.n1 {
+            grid-row: 2;
+            line-height: 1.2;
+            margin-top: 0.3em;
+        }
+
+        span.n2 {
+            grid-row: 3;
+            font-size: 75%;
+            line-height: 1.1;
+            margin-top: 0.3em;
+            margin-bottom: 0.3em;
+        }
+
+        span.n3 {
+            grid-row: 1;
+            font-size: 75%;
+
+            line-height: 1.2;
+            padding-top: 0.3em;
+            margin-bottom: -0.3em; /* offset top margin of first (which is needed in case of no content for third) */
+        }
+    }
+}
+
+/* Snap section heading */
+h2.sectionname,
+h3.sectionname,
+#page-mod-forum-view h1.h2 {
+    span.mlnc {
+        display: grid;
+        grid-template-rows: min-content min-content min-content;
+
+        span:not([class]) {
+            display: none;
+        }
+
+        span.n1 {
+            grid-row: 2;
+            line-height: 1.2;
+        }
+
+        span.n2 {
+            grid-row: 3;
+            font-size: 75%;
+
+            line-height: 1.2;
+            margin-top: 0;
+            margin-bottom: 0.3em;
+        }
+
+        span.n3 {
+            grid-row: 1;
+            font-size: 75%;
+
+            line-height: 1.2;
+            padding-top: 0.3em;
+        }
+    }
+}
+
+/* Snap footer */
+nav.section_footer {
+    span.text {
+        span.mlnc {
+            display: grid;
+            grid-template-rows: min-content min-content min-content;
+            margin-bottom: 0.5em;
+
+            span:not([class]) {
+                display: none;
+            }
+
+            span.n1 {
+                grid-row: 2;
+                line-height: 1.2;
+            }
+
+            span.n2 {
+                grid-row: 3;
+                font-size: 75%;
+
+                line-height: 1.2;
+                margin-top: 0.3em;
+                margin-bottom: 0.3em;
+            }
+
+            span.n3 {
+                grid-row: 1;
+                font-size: 75%;
+
+                line-height: 1.2;
+                padding-top: 0.3em;
+            }
+        }
+    }
+}
+
+/* Snap activity display */
+li.snap-activity {
+    a.mod-link:has(span.mlnc) {
+        display: flex;
+        margin-bottom: 1em;
+
+        span.mlnc {
+            display: inline-grid;
+            grid-template-rows: min-content min-content min-content;
+            align-content: center;
+
+            margin-bottom: 0;
+
+            span:not([class]) {
+                display: none;
+            }
+
+            span.n1 {
+                grid-row: 2;
+            }
+
+            span.n2 {
+                grid-row: 3;
+                font-size: 80%;
+
+                line-height: 1.2;
+                margin-top: 0.3em;
+                margin-bottom: 0.3em;
+            }
+
+            span.n3 {
+                grid-row: 1;
+                font-size: 75%;
+
+                line-height: 1.2;
+                margin-top: 0.3em;
+                margin-bottom: 0.3em;
+            }
+        }
+    }
+
+
+}
+/* LMS0267 end */
