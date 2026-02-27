@@ -27,3 +27,5 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Snap multilang names';
 $string['privacy:metadata'] = 'The Snap multilang names plugin doesn\'t store any personal data.';
+$string['enablemultilangnames'] = 'Enable multilang names';
+$string['enablemultilangnames_desc'] = 'When enabled, courses may activate the multilang names feature via a course-level setting.';

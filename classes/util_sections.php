@@ -26,6 +26,28 @@ namespace theme_snap;
 class util_sections {
 
     /**
+     * Check if the multilang names feature is enabled for the current course.
+     *
+     * Both the system-wide setting and the course-level custom field must be
+     * enabled. The system-wide setting acts as a global gate.
+     *
+     * @return bool True if enabled at both system and course level, false otherwise.
+     */
+    private static function is_enabled(): bool {
+        global $COURSE;
+
+        // Check system-wide setting first.
+        if (!get_config('local_snapmultilangnames', 'enablemultilangnames')) {
+            return false;
+        }
+
+        // Check course-level custom field.
+        $handler = \core_course\customfield\course_handler::create();
+        $data = $handler->export_instance_data_object($COURSE->id, true);
+        return !empty($data->enablemultilangnames);
+    }
+
+    /**
      * Get the value of the "usemultilanguagesectionnames" course custom field.
      * Field definition: Use multi-language section names | usemultilanguagesectionnames | Dropdown menu | No, Yes, Auto
      *
@@ -40,6 +62,10 @@ class util_sections {
     }
 
     public static function format_multilanguage_text(string $text): string {
+        if (!self::is_enabled()) {
+            return ''; /* Feature is not enabled for this course */
+        }
+
         if (self::get_use_multilanguage_section_names() === 'No') {
             return ''; /* Return blank to short-curcuit downstream rendering processes */
         }

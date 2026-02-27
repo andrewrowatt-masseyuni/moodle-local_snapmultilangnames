@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for Snap multilang names
+ * Admin settings for local_snapmultilangnames.
  *
  * @package    local_snapmultilangnames
  * @copyright  2026 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
@@ -24,9 +24,18 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component    = 'local_snapmultilangnames';
-$plugin->release      = '1.0';
-$plugin->version      = 2026022701;
-$plugin->requires     = 2024100700;
-$plugin->supported    = [405, 405];
-$plugin->maturity     = MATURITY_STABLE;
+if ($hassiteconfig) {
+    $settings = new admin_settingpage(
+        'local_snapmultilangnames',
+        get_string('pluginname', 'local_snapmultilangnames')
+    );
+
+    $ADMIN->add('localplugins', $settings);
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_snapmultilangnames/enablemultilangnames',
+        get_string('enablemultilangnames', 'local_snapmultilangnames'),
+        get_string('enablemultilangnames_desc', 'local_snapmultilangnames'),
+        0 // Default: off.
+    ));
+}

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for Snap multilang names
+ * Upgrade script for local_snapmultilangnames.
  *
  * @package    local_snapmultilangnames
  * @copyright  2026 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
@@ -24,9 +24,17 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component    = 'local_snapmultilangnames';
-$plugin->release      = '1.0';
-$plugin->version      = 2026022701;
-$plugin->requires     = 2024100700;
-$plugin->supported    = [405, 405];
-$plugin->maturity     = MATURITY_STABLE;
+/**
+ * Upgrade function for local_snapmultilangnames.
+ *
+ * @param int $oldversion
+ * @return bool
+ */
+function xmldb_local_snapmultilangnames_upgrade(int $oldversion): bool {
+    if ($oldversion < 2026022701) {
+        local_snapmultilangnames_create_customfield();
+        upgrade_plugin_savepoint(true, 2026022701, 'local', 'snapmultilangnames');
+    }
+
+    return true;
+}
