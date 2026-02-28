@@ -32,8 +32,7 @@ $string['enablemultilangnames_desc'] = 'When enabled, courses may activate the m
 
 $string['managemultilangsettings'] = 'Manage multilang section names';
 $string['coursesections'] = 'Section language settings';
-$string['coursesections_desc'] = 'Set the language for each component of each section name. Components are separated by | in the section name. Use "Auto-detect" to detect the language automatically.';
-$string['lang_auto'] = 'Auto-detect';
+$string['coursesections_desc'] = 'Set the language for each component of each section name. Components are separated by | in the section name.';
 $string['lang_en'] = 'English (en)';
 $string['lang_mi'] = 'Māori (mi)';
 $string['lang_fr'] = 'French (fr)';
@@ -41,6 +40,7 @@ $string['lang_zh'] = 'Chinese (zh)';
 $string['lang_ja'] = 'Japanese (ja)';
 $string['section_number'] = 'Section {$a}';
 $string['component'] = 'Component {$a}';
+$string['lang_label'] = 'Language';
 $string['saved'] = 'Language settings saved.';
 $string['error_notenabledglobally'] = 'Multilang names is not enabled system-wide.';
 $string['error_notenabledcourse'] = 'Multilang names is not enabled for this course.';

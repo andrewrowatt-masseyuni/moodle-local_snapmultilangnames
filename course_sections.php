@@ -77,19 +77,28 @@ $form = new \local_snapmultilangnames\form\course_sections_form($pageurl, [
     'langdata' => $langdata,
 ]);
 
-if ($form->is_cancelled()) {
+// The language selects are raw HTML (not registered moodleform elements) so
+// submission is handled directly via optional_param() rather than get_data().
+if (optional_param('cancel', false, PARAM_BOOL)) {
     redirect(new moodle_url('/course/view.php', ['id' => $courseid]));
 
-} else if ($formdata = $form->get_data()) {
+} elseif (data_submitted()) {
+    require_sesskey();
 
-    $now = time();
+    $allowed = \local_snapmultilangnames\form\course_sections_form::ALLOWED_LANGS;
+    $now     = time();
 
     foreach ($sections as $section) {
         $sid = (int) $section->id;
 
-        $lang1 = clean_param($formdata->{'lang1_' . $sid} ?? '', PARAM_NOTAGS);
-        $lang2 = clean_param($formdata->{'lang2_' . $sid} ?? '', PARAM_NOTAGS);
-        $lang3 = clean_param($formdata->{'lang3_' . $sid} ?? '', PARAM_NOTAGS);
+        $lang1 = optional_param('lang1_' . $sid, '', PARAM_NOTAGS);
+        $lang2 = optional_param('lang2_' . $sid, '', PARAM_NOTAGS);
+        $lang3 = optional_param('lang3_' . $sid, '', PARAM_NOTAGS);
+
+        // Restrict to known values; treat anything unexpected as English.
+        $lang1 = in_array($lang1, $allowed, true) ? $lang1 : 'en';
+        $lang2 = in_array($lang2, $allowed, true) ? $lang2 : 'en';
+        $lang3 = in_array($lang3, $allowed, true) ? $lang3 : 'en';
 
         $existing = $langdata[$sid] ?? null;
 

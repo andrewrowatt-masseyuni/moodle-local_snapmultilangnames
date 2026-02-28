@@ -20,10 +20,47 @@ span.mlnc {
     }
 }
 
+/* Management form: inline preview with Bootstrap dropdowns */
+.mlnc-form-preview {
+    --font-mi: "Georgia", serif;
+    --font-sans: Source Sans Pro, Roboto, Arial, sans-serif;
+
+    span:lang(mi) {
+        font-family: var(--font-mi);
+    }
+
+    span:lang(zh),
+    span:lang(zh-hans) {
+        font-style: normal;
+    }
+
+    .n2 {
+        font-size: 85%;
+    }
+
+    .n3 {
+        font-size: 85%;
+        font-style: italic;
+        font-family: var(--font-sans);
+    }
+}
+
+.mlnc-form-component {
+    border: 1px dotted #6c757d;
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+}
+
+.mlnc-form-placeholder {
+    border: 1px dashed #6c757d;
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    color: #6c757d;
+}
+
 /* Snap table of contents */
 #chapters h3 a,
-#namemultilang_preview,
-.mlnc_preview {
+#namemultilang_preview {
     span.mlnc {
         display: grid;
         grid-template-rows: min-content min-content min-content;
@@ -37,20 +74,6 @@ span.mlnc {
         span {
             text-overflow: ellipsis;
             overflow: hidden;
-
-            &[data-language]::after {
-                --tagcolor: color-mix(in srgb, currentColor 10%, white);
-                content: attr(data-language);
-                font-family: var(--font-sans);
-                font-size: 12px;
-                font-style: normal;
-                line-height: 1;
-                margin-left: 0.3em;
-                background-color: var(--tagcolor);
-                border: 1px solid var(--tagcolor);
-                border-radius: 8px;
-                padding: 3px;
-            }
         }
 
         span.n1 {

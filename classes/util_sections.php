@@ -25,6 +25,28 @@ namespace local_snapmultilangnames;
  */
 class util_sections {
 
+    /** @var array<int,\stdClass>|null Section lang records keyed by sectionid, null until loaded. */
+    private static ?array $section_cache = null;
+
+    /**
+     * Bulk-load all local_snapmultilangnames_sec rows for a course into the static cache.
+     *
+     * @param int $courseid
+     */
+    private static function load_section_cache(int $courseid): void {
+        global $DB;
+        $records = $DB->get_records(
+            'local_snapmultilangnames_sec',
+            ['courseid' => $courseid],
+            '',
+            'sectionid, lang1, lang2, lang3'
+        );
+        self::$section_cache = [];
+        foreach ($records as $rec) {
+            self::$section_cache[(int)$rec->sectionid] = $rec;
+        }
+    }
+
     /**
      * Check if the multilang names feature is enabled for the current course.
      *
@@ -33,7 +55,7 @@ class util_sections {
      *
      * @return bool True if enabled at both system and course level, false otherwise.
      */
-    private static function is_enabled(): bool {
+    public static function is_enabled(): bool {
         global $COURSE;
 
         // Check system-wide setting first.
@@ -44,125 +66,46 @@ class util_sections {
         // Check course-level custom field.
         $handler = \core_course\customfield\course_handler::create();
         $data = $handler->export_instance_data_object($COURSE->id, true);
-        return !empty($data->enablemultilangnames);
+        $enabled = "Yes" === ($data->enablemultilangnames ?? 'No');
+        if ($enabled && self::$section_cache === null) {
+            self::load_section_cache($COURSE->id);
+        }
+        return $enabled;
     }
 
-    /**
-     * Get the value of the "usemultilanguagesectionnames" course custom field.
-     * Field definition: Use multi-language section names | usemultilanguagesectionnames | Dropdown menu | No, Yes, Auto
-     *
-     * @return string The custom field value, or 'No' if not set.
-     */
-    private static function get_use_multilanguage_section_names(): string {
-        global $COURSE;
-
-        $handler = \core_course\customfield\course_handler::create();
-        $data = $handler->export_instance_data_object($COURSE->id, true);
-        return $data->usemultilanguagesectionnames ?? 'No';
-    }
-
-    public static function format_multilanguage_text(string $text): string {
+    public static function get_multilang_html($section): string {
         if (!self::is_enabled()) {
             return ''; /* Feature is not enabled for this course */
         }
 
-        if (self::get_use_multilanguage_section_names() === 'No') {
-            return ''; /* Return blank to short-curcuit downstream rendering processes */
-        }
+        $secdata = self::$section_cache[(int)$section->id] ?? null;
 
-        $parts = explode('|', $text);
-        $spans = [];
+        $html ='';
 
-        foreach ($parts as $index => $part) {
-            $trimmed = trim($part);
-            $language = self::detect_language($trimmed);
-            $spans[] = '<span class="n' . ($index + 1) . '"' . ($language ? " lang=\"$language\"" : '') . '>' . $trimmed . '</span>';
-        }
+        if ($secdata) {
+            $html = '<span class="mlnc">';
 
-        return '<span class="mlnc">' . implode('', $spans) . '</span>';
-    }
-
-    /**
-     * Test if a string appears to be in Māori.
-     *
-     * Checks for Māori language indicators such as macrons (tohutō) and
-     * whether the text uses only characters from the Māori alphabet.
-     * The Māori alphabet consists of: a, e, h, i, k, m, n, o, p, r, t, u, w
-     * and the digraphs ng and wh, plus vowels with macrons (ā, ē, ī, ō, ū).
-     *
-     * @param string $text The text to test.
-     * @return bool True if the text appears to be in Māori, false otherwise.
-     */
-    public static function is_maori(string $text): bool {
-        if (empty(trim($text))) {
-            return false;
-        }
-
-        // Māori vowels with macrons (tohutō).
-        $macrons = ['ā', 'ē', 'ī', 'ō', 'ū', 'Ā', 'Ē', 'Ī', 'Ō', 'Ū'];
-
-        // Check if text contains macrons - strong indicator of Māori.
-        foreach ($macrons as $macron) {
-            if (mb_strpos($text, $macron) !== false) {
-                return true;
+            $parts = explode('|', $section->name ?? '', 4);
+            if (isset($parts[3])) {
+                $parts[2] = "{$parts[2]}|{$parts[3]}";
+                unset($parts[3]);
             }
+            $spans = [];
+
+            foreach ($parts as $index => $part) {
+                $trimmed = trim($part);
+                $langindex = $index + 1;
+                $langfield = "lang$langindex";
+                $language = $secdata->$langfield ?? '';
+                $spans[] = "<span class=\"n$langindex\"" . ($language ? " lang=\"$language\"" : '') . '>' . $trimmed . '</span>';
+            }
+
+            $html .= implode('', $spans);
+
+            $html .= '</span>';
         }
 
-        // Valid Māori characters: a, e, h, i, k, m, n, o, p, r, t, u, w
-        // Plus macron vowels, spaces, and common punctuation.
-        // Pattern matches text that contains ONLY valid Māori characters.
-        $pattern = '/^[aehikmnoprtuwāēīōūAEHIKMNOPRTUWĀĒĪŌŪ\s\-\'\.,!?]+$/u';
-
-        return preg_match($pattern, $text) === 1;
+        return $html;
     }
 
-    /**
-     * Detect the language of a string.
-     *
-     * Attempts to identify if the text is in Māori, Mandarin Chinese (Putonghua),
-     * Japanese, French, or English based on character patterns.
-     *
-     * @param string $text The text to analyse.
-     * @return string The HTML language code: 'mi' (Māori), 'zh' (Mandarin),
-     *                'ja' (Japanese), 'fr' (French), or 'en' (English).
-     */
-    public static function detect_language(string $text): string {
-        $text = trim($text);
-
-        if (empty($text)) {
-            return 'en';
-        }
-
-        // Check for Chinese characters (CJK Unified Ideographs).
-        // Chinese uses Han characters without hiragana/katakana.
-        $hasChinese = preg_match('/[\x{4e00}-\x{9fff}]/u', $text);
-
-        // Check for Japanese-specific characters (Hiragana and Katakana).
-        $hasJapanese = preg_match('/[\x{3040}-\x{309f}\x{30a0}-\x{30ff}]/u', $text);
-
-        // Japanese: Has hiragana/katakana (may also have kanji).
-        if ($hasJapanese) {
-            return 'ja';
-        }
-
-        // Chinese (Putonghua): Has Chinese characters but no Japanese kana.
-        if ($hasChinese) {
-            return 'zh';
-        }
-
-        // Check for Māori - macrons are a strong indicator.
-        if (self::is_maori($text)) {
-            return 'mi';
-        }
-
-        // Check for French-specific characters and patterns.
-        // French uses accented characters: é, è, ê, ë, à, â, ù, û, ô, î, ï, ç, œ, æ.
-        $frenchPattern = '/[éèêëàâùûôîïçœæÉÈÊËÀÂÙÛÔÎÏÇŒÆ]/u';
-        if (preg_match($frenchPattern, $text)) {
-            return 'fr';
-        }
-
-        // Default to none.
-        return '';
-    }
 }

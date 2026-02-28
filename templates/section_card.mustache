@@ -1,0 +1,71 @@
+{{!
+    Renders one Bootstrap card for a course section's language settings.
+
+    Context:
+      headerlabel  (string) Raw HTML: "Section N" or "Section N: <span>raw name</span>".
+      sid          (int)    Section ID (database).
+      sectionnum   (int)    Section number (0-based position in course, shown in card header).
+      components   (array)  One entry per component (n=1,2,3), always 3 entries.
+        n            (int)    Component number (1–3).
+        spanid       (string) Element ID for the preview span, e.g. "mlnc-n1-42".
+        fieldname    (string) Hidden input name, e.g. "lang1_42".
+        text         (string) Raw text of this component (HTML-escaped by Mustache).
+        isreal       (bool)   True when this component exists in the section name.
+        lang         (string) Resolved BCP47 code for the lang= attribute, or '' for none.
+        currentvalue (string) The stored lang value (form field value).
+        currentlabel (string) Human-readable label for the current selection.
+        componentlabel (string) e.g. "Component 1" — shown in placeholder rows.
+        arialabel    (string) Accessible label for the dropdown button.
+        options      (array)  Language options.
+          value      (string) BCP47 code or '' for auto-detect.
+          label      (string) Human-readable option label.
+          selected   (bool)   True when this option is the current selection.
+          spanid     (string) Copied from parent component (Mustache flattening).
+          fieldname  (string) Copied from parent component (Mustache flattening).
+
+    @template local_snapmultilangnames/section_card
+    @copyright 2026 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
+    @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+<div class="card mb-3" data-section-num="{{sectionnum}}">
+    <div class="card-header py-2">{{{headerlabel}}}</div>
+    <div class="card-body py-2">
+        <div class="mlnc-form-preview flex-column" style="gap: .25em; display: inline-flex;">
+            {{#components}}
+            <div class="d-flex align-items-center justify-content-between mlnc-form-component{{^isreal}} mlnc-form-placeholder{{/isreal}}" style="gap: .5em;">
+                <div class="mlnc-form-text">
+                    {{#isreal}}
+                    <span class="n{{n}}" id="{{spanid}}"{{#lang}} lang="{{lang}}"{{/lang}}
+                          data-language="{{currentlabel}}">{{text}}</span>
+                    {{/isreal}}
+                    {{^isreal}}
+                    <span class="text-muted fst-italic small">{{componentlabel}}</span>
+                    {{/isreal}}
+                </div>
+                <div class="dropdown flex-shrink-0">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary dropdown-toggle mlnc-toggle"
+                            aria-expanded="false"
+                            aria-label="{{arialabel}}"
+                            {{^isreal}}disabled{{/isreal}}>{{currentlabel}}</button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {{#options}}
+                        <li>
+                            <button class="dropdown-item small{{#selected}} active{{/selected}}"
+                                    type="button"
+                                    data-mlnc-span="{{spanid}}"
+                                    data-mlnc-field="{{fieldname}}"
+                                    data-mlnc-value="{{value}}">{{label}}</button>
+                        </li>
+                        {{/options}}
+                    </ul>
+                    <input type="hidden"
+                           name="{{fieldname}}"
+                           id="input-{{fieldname}}"
+                           value="{{currentvalue}}">
+                </div>
+            </div>
+            {{/components}}
+        </div>
+    </div>
+</div>
