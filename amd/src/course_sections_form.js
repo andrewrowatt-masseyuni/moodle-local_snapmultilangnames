@@ -19,19 +19,13 @@
  * Keeps the Bootstrap dropdowns and preview spans in sync with the hidden
  * inputs that carry the selected BCP47 code on form submit.
  *
+ * Language labels are supplied by the PHP caller via the config argument so
+ * that the admin 'languages' setting is the single source of truth.
+ *
  * @module     local_snapmultilangnames/course_sections_form
  * @copyright  2026 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-/** Human-readable labels matching PHP lang_options(). */
-const langLabels = {
-    "en": "English (en)",
-    "mi": "M\u0101ori (mi)",
-    "fr": "French (fr)",
-    "zh": "Chinese (zh)",
-    "ja": "Japanese (ja)",
-};
 
 /**
  * Close all open mlnc dropdowns except the given one.
@@ -50,11 +44,16 @@ const closeAllDropdowns = (except) => {
 
 /**
  * Initialise dropdown event delegation on the document.
+ *
+ * @param {object} config
+ * @param {object} config.langLabels BCP47 code => human-readable label map from PHP.
  */
-export const init = () => {
+export const init = (config) => {
+    const langLabels = config.langLabels || {};
 
-    // Self-managed toggle: open/close on button click.
     document.addEventListener("click", (e) => {
+
+        // --- Toggle: open/close the dropdown on button click ---
         const toggle = e.target.closest(".mlnc-toggle");
         if (toggle && !toggle.disabled) {
             const menu = toggle.closest(".dropdown").querySelector(".dropdown-menu");
@@ -70,62 +69,59 @@ export const init = () => {
             return;
         }
 
-        // Close all dropdowns when clicking outside.
-        if (!e.target.closest(".dropdown")) {
-            closeAllDropdowns(null);
-        }
-    });
-
-    document.addEventListener("click", (e) => {
+        // --- Item selection: update hidden input, preview span, and active state ---
         const item = e.target.closest(".dropdown-item[data-mlnc-field]");
-        if (!item) {
+        if (item) {
+            // Close the dropdown that contains this item.
+            const dropdown = item.closest(".dropdown");
+            const menu = dropdown.querySelector(".dropdown-menu");
+            const btn = dropdown.querySelector(".mlnc-toggle");
+            menu.classList.remove("show");
+            if (btn) {
+                btn.setAttribute("aria-expanded", "false");
+            }
+
+            const value = item.dataset.mlncValue;
+            const spanId = item.dataset.mlncSpan;
+            const fieldName = item.dataset.mlncField;
+
+            // Update the hidden input that carries the value on form submit.
+            const input = document.getElementById("input-" + fieldName);
+            if (input) {
+                input.value = value;
+            }
+
+            // Update active state within this dropdown menu.
+            menu.querySelectorAll(".dropdown-item").forEach((el) => {
+                el.classList.remove("active");
+            });
+            item.classList.add("active");
+
+            // Compute the human-readable label for the toggle button.
+            const label = langLabels[value] || value.toUpperCase();
+
+            // Update the dropdown toggle button label.
+            if (btn) {
+                btn.textContent = label;
+            }
+
+            // Update the preview span's lang attribute and data-language.
+            const span = spanId ? document.getElementById(spanId) : null;
+            if (span) {
+                if (value) {
+                    span.setAttribute("lang", value);
+                } else {
+                    span.removeAttribute("lang");
+                }
+                span.setAttribute("data-language", label);
+            }
+
             return;
         }
 
-        // Close the dropdown that contains this item.
-        const dropdown = item.closest(".dropdown");
-        const menu = dropdown.querySelector(".dropdown-menu");
-        const toggle = dropdown.querySelector(".mlnc-toggle");
-        menu.classList.remove("show");
-        if (toggle) {
-            toggle.setAttribute("aria-expanded", "false");
-        }
-
-        const value = item.dataset.mlncValue;
-        const spanId = item.dataset.mlncSpan;
-        const fieldName = item.dataset.mlncField;
-
-        // Update the hidden input that carries the value on form submit.
-        const input = document.getElementById("input-" + fieldName);
-        if (input) {
-            input.value = value;
-        }
-
-        // Update active state within this dropdown menu.
-        item.closest(".dropdown-menu").querySelectorAll(".dropdown-item").forEach((el) => {
-            el.classList.remove("active");
-        });
-        item.classList.add("active");
-
-        // Compute lang code and human-readable label for the toggle button.
-        const lang = value;
-        const label = langLabels[value] || value.toUpperCase();
-
-        // Update the dropdown toggle button label.
-        const btn = item.closest(".dropdown").querySelector(".dropdown-toggle");
-        if (btn) {
-            btn.textContent = label;
-        }
-
-        // Update the preview span's lang attribute.
-        const span = spanId ? document.getElementById(spanId) : null;
-        if (span) {
-            if (lang) {
-                span.setAttribute("lang", lang);
-            } else {
-                span.removeAttribute("lang");
-            }
-            span.setAttribute("data-language", label);
+        // --- Outside click: close all open dropdowns ---
+        if (!e.target.closest(".dropdown")) {
+            closeAllDropdowns(null);
         }
     });
 };

@@ -38,4 +38,11 @@ if ($hassiteconfig) {
         get_string('enablemultilangnames_desc', 'local_snapmultilangnames'),
         0 // Default: off.
     ));
+
+    $settings->add(new admin_setting_configtextarea(
+        'local_snapmultilangnames/languages',
+        get_string('languages', 'local_snapmultilangnames'),
+        get_string('languages_desc', 'local_snapmultilangnames'),
+        "en|English (en)\nmi|M\u{0101}ori (mi)\nfr|French (fr)\nzh|Chinese (zh)\nja|Japanese (ja)"
+    ));
 }

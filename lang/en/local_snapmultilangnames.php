@@ -25,23 +25,20 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Snap multilang names';
-$string['privacy:metadata'] = 'The Snap multilang names plugin doesn\'t store any personal data.';
-$string['enablemultilangnames'] = 'Enable multilang names';
-$string['enablemultilangnames_desc'] = 'When enabled, courses may activate the multilang names feature via a course-level setting.';
-
-$string['managemultilangsettings'] = 'Manage multilang section names';
+$string['component'] = 'Component {$a}';
 $string['coursesections'] = 'Section language settings';
 $string['coursesections_desc'] = 'Set the language for each component of each section name. Components are separated by | in the section name.';
-$string['lang_en'] = 'English (en)';
-$string['lang_mi'] = 'Māori (mi)';
-$string['lang_fr'] = 'French (fr)';
-$string['lang_zh'] = 'Chinese (zh)';
-$string['lang_ja'] = 'Japanese (ja)';
-$string['section_number'] = 'Section {$a}';
-$string['component'] = 'Component {$a}';
-$string['lang_label'] = 'Language';
-$string['saved'] = 'Language settings saved.';
-$string['error_notenabledglobally'] = 'Multilang names is not enabled system-wide.';
+$string['enablemultilangnames'] = 'Enable multilang names';
+$string['enablemultilangnames_desc'] = 'When enabled, courses may activate the multilang names feature via a course-level setting.';
 $string['error_notenabledcourse'] = 'Multilang names is not enabled for this course.';
+$string['error_notenabledglobally'] = 'Multilang names is not enabled system-wide.';
+$string['lang_label'] = 'Language';
+$string['languages'] = 'Language options';
+$string['languages_desc'] = 'BCP47 language codes and their display labels, one per line in the format: code|Label. Example: en|English (en)';
+$string['managemultilangsettings'] = 'Manage multilang section names';
+$string['pluginname'] = 'Snap multilang names';
 $string['preview'] = 'Preview';
+$string['privacy:metadata'] = 'The Snap multilang names plugin doesn\'t store any personal data.';
+
+$string['saved'] = 'Language settings saved.';
+$string['section_number'] = 'Section {$a}';

@@ -28,7 +28,6 @@ namespace local_snapmultilangnames;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
-
     /**
      * Triggered when a course section is created.
      *
@@ -46,11 +45,18 @@ class observer {
             return;
         }
 
+        // Guard: course-level feature must be enabled.
+        if (!\local_snapmultilangnames\util_sections::is_enabled_for_course($event->courseid)) {
+            return;
+        }
+
         // Guard: do not duplicate rows (e.g. during course restore).
-        if ($DB->record_exists('local_snapmultilangnames_sec', [
+        if (
+            $DB->record_exists('local_snapmultilangnames_sec', [
             'courseid'  => $event->courseid,
             'sectionid' => $event->objectid,
-        ])) {
+            ])
+        ) {
             return;
         }
 
@@ -58,9 +64,9 @@ class observer {
         $DB->insert_record('local_snapmultilangnames_sec', (object) [
             'courseid'     => $event->courseid,
             'sectionid'    => $event->objectid,
-            'lang1'        => '',
-            'lang2'        => '',
-            'lang3'        => '',
+            'lang1'        => 'en',
+            'lang2'        => 'en',
+            'lang3'        => 'en',
             'timecreated'  => $now,
             'timemodified' => $now,
         ]);

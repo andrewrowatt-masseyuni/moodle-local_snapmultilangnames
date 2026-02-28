@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Adds a "Manage multilang section names" link to the course navigation.
  *
@@ -51,9 +49,7 @@ function local_snapmultilangnames_extend_navigation_course(
     }
 
     // 2. Course-level custom field gate.
-    $handler = \core_course\customfield\course_handler::create();
-    $cfdata  = $handler->export_instance_data_object($course->id, true);
-    if (empty($cfdata->enablemultilangnames)) {
+    if (!\local_snapmultilangnames\util_sections::is_enabled_for_course($course->id)) {
         return;
     }
 
@@ -62,8 +58,10 @@ function local_snapmultilangnames_extend_navigation_course(
         return;
     }
 
-    $url = new moodle_url('/local/snapmultilangnames/course_sections.php',
-        ['courseid' => $course->id]);
+    $url = new moodle_url(
+        '/local/snapmultilangnames/course_sections.php',
+        ['courseid' => $course->id]
+    );
 
     $node = navigation_node::create(
         get_string('managemultilangsettings', 'local_snapmultilangnames'),

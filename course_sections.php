@@ -33,21 +33,19 @@ $course = get_course($courseid);
 require_login($course);
 $coursecontext = context_course::instance($courseid);
 
-// ---- Access checks ----
+// Access checks.
 
 if (!get_config('local_snapmultilangnames', 'enablemultilangnames')) {
     throw new \moodle_exception('error_notenabledglobally', 'local_snapmultilangnames');
 }
 
-$handler = \core_course\customfield\course_handler::create();
-$cfdata  = $handler->export_instance_data_object($courseid, true);
-if (empty($cfdata->enablemultilangnames)) {
+if (!\local_snapmultilangnames\util_sections::is_enabled_for_course($courseid)) {
     throw new \moodle_exception('error_notenabledcourse', 'local_snapmultilangnames');
 }
 
 require_capability('local/snapmultilangnames:managemultilangsettings', $coursecontext);
 
-// ---- Page setup ----
+// Page setup.
 
 $pageurl = new moodle_url('/local/snapmultilangnames/course_sections.php', ['courseid' => $courseid]);
 $PAGE->set_url($pageurl);
@@ -57,7 +55,7 @@ $PAGE->set_pagelayout('incourse');
 $PAGE->set_title(get_string('managemultilangsettings', 'local_snapmultilangnames'));
 $PAGE->set_heading($course->fullname);
 
-// ---- Load data ----
+// Load data.
 
 // All sections for this course ordered by section number.
 $sections = $DB->get_records('course_sections', ['course' => $courseid], 'section ASC');
@@ -69,7 +67,7 @@ foreach ($rawlangrows as $row) {
     $langdata[$row->sectionid] = $row;
 }
 
-// ---- Build and process form ----
+// Build and process form.
 
 $form = new \local_snapmultilangnames\form\course_sections_form($pageurl, [
     'courseid' => $courseid,
@@ -81,12 +79,12 @@ $form = new \local_snapmultilangnames\form\course_sections_form($pageurl, [
 // submission is handled directly via optional_param() rather than get_data().
 if (optional_param('cancel', false, PARAM_BOOL)) {
     redirect(new moodle_url('/course/view.php', ['id' => $courseid]));
-
-} elseif (data_submitted()) {
+} else if (data_submitted()) {
     require_sesskey();
 
-    $allowed = \local_snapmultilangnames\form\course_sections_form::ALLOWED_LANGS;
-    $now     = time();
+    $allowed  = array_keys(\local_snapmultilangnames\util_sections::get_language_options());
+    $fallback = $allowed[0] ?? 'en';
+    $now      = time();
 
     foreach ($sections as $section) {
         $sid = (int) $section->id;
@@ -95,10 +93,10 @@ if (optional_param('cancel', false, PARAM_BOOL)) {
         $lang2 = optional_param('lang2_' . $sid, '', PARAM_NOTAGS);
         $lang3 = optional_param('lang3_' . $sid, '', PARAM_NOTAGS);
 
-        // Restrict to known values; treat anything unexpected as English.
-        $lang1 = in_array($lang1, $allowed, true) ? $lang1 : 'en';
-        $lang2 = in_array($lang2, $allowed, true) ? $lang2 : 'en';
-        $lang3 = in_array($lang3, $allowed, true) ? $lang3 : 'en';
+        // Restrict to known values; treat anything unexpected as the first configured language.
+        $lang1 = in_array($lang1, $allowed, true) ? $lang1 : $fallback;
+        $lang2 = in_array($lang2, $allowed, true) ? $lang2 : $fallback;
+        $lang3 = in_array($lang3, $allowed, true) ? $lang3 : $fallback;
 
         $existing = $langdata[$sid] ?? null;
 
@@ -123,11 +121,15 @@ if (optional_param('cancel', false, PARAM_BOOL)) {
         }
     }
 
-    redirect($pageurl, get_string('saved', 'local_snapmultilangnames'),
-        null, \core\output\notification::NOTIFY_SUCCESS);
+    redirect(
+        $pageurl,
+        get_string('saved', 'local_snapmultilangnames'),
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
 }
 
-// ---- Render page ----
+// Render page.
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('coursesections', 'local_snapmultilangnames'));

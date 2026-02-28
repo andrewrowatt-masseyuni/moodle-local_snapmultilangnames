@@ -24,9 +24,8 @@ namespace local_snapmultilangnames;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class util_sections {
-
-    /** @var array<int,\stdClass>|null Section lang records keyed by sectionid, null until loaded. */
-    private static ?array $section_cache = null;
+    /** @var array<int,array<int,\stdClass>> Section lang records keyed by [courseid][sectionid]. */
+    private static array $sectioncache = [];
 
     /**
      * Bulk-load all local_snapmultilangnames_sec rows for a course into the static cache.
@@ -41,10 +40,25 @@ class util_sections {
             '',
             'sectionid, lang1, lang2, lang3'
         );
-        self::$section_cache = [];
+        self::$sectioncache[$courseid] = [];
         foreach ($records as $rec) {
-            self::$section_cache[(int)$rec->sectionid] = $rec;
+            self::$sectioncache[$courseid][(int)$rec->sectionid] = $rec;
         }
+    }
+
+    /**
+     * Check if the multilang names feature is enabled for a specific course.
+     *
+     * Only checks the course-level custom field; does NOT check the system-wide gate.
+     * Use is_enabled() for the full two-gate check.
+     *
+     * @param int $courseid
+     * @return bool
+     */
+    public static function is_enabled_for_course(int $courseid): bool {
+        $handler = \core_course\customfield\course_handler::create();
+        $data = $handler->export_instance_data_object($courseid, true);
+        return !empty($data->enablemultilangnames);
     }
 
     /**
@@ -64,23 +78,68 @@ class util_sections {
         }
 
         // Check course-level custom field.
-        $handler = \core_course\customfield\course_handler::create();
-        $data = $handler->export_instance_data_object($COURSE->id, true);
-        $enabled = "Yes" === ($data->enablemultilangnames ?? 'No');
-        if ($enabled && self::$section_cache === null) {
+        if (!self::is_enabled_for_course($COURSE->id)) {
+            return false;
+        }
+
+        // Warm the section cache for this course if not already loaded.
+        if (!isset(self::$sectioncache[$COURSE->id])) {
             self::load_section_cache($COURSE->id);
         }
-        return $enabled;
+
+        return true;
     }
 
+    /**
+     * Returns BCP47 code => label pairs from the configured language list.
+     *
+     * Reads the 'languages' admin setting. Each line must be in "code|label"
+     * format. Returns an empty array if the setting is empty or unparseable.
+     *
+     * @return array<string,string>
+     */
+    /** @var string Built-in language list used when the admin setting has not been saved yet. */
+    private const DEFAULT_LANGUAGES = "en|English (en)\nmi|M\u{0101}ori (mi)\nfr|French (fr)\nzh|Chinese (zh)\nja|Japanese (ja)";
+
+    public static function get_language_options(): array {
+        $raw = get_config('local_snapmultilangnames', 'languages');
+        if ($raw === false || trim($raw) === '') {
+            $raw = self::DEFAULT_LANGUAGES;
+        }
+        $options = [];
+        foreach (explode("\n", $raw) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $parts = explode('|', $line, 2);
+            if (\count($parts) === 2) {
+                $code  = trim($parts[0]);
+                $label = trim($parts[1]);
+                if ($code !== '') {
+                    $options[$code] = $label;
+                }
+            }
+        }
+        return $options;
+    }
+
+    /**
+     * Returns the HTML for a multilang section name, or '' if not applicable.
+     *
+     * @param \stdClass $section A record from course_sections (must have id and name).
+     * @return string
+     */
     public static function get_multilang_html($section): string {
+        global $COURSE;
+
         if (!self::is_enabled()) {
             return ''; /* Feature is not enabled for this course */
         }
 
-        $secdata = self::$section_cache[(int)$section->id] ?? null;
+        $secdata = self::$sectioncache[$COURSE->id][(int)$section->id] ?? null;
 
-        $html ='';
+        $html = '';
 
         if ($secdata) {
             $html = '<span class="mlnc">';
@@ -107,5 +166,4 @@ class util_sections {
 
         return $html;
     }
-
 }

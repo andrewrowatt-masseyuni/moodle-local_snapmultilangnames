@@ -25,13 +25,12 @@
 
 // NOTE: no MOODLE_INTERNAL check here — Behat context files are not loaded through Moodle bootstrap.
 
-require_once __DIR__ . '/../../../../lib/behat/behat_base.php';
+require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 
 /**
  * Step definitions for the local_snapmultilangnames plugin.
  */
 class behat_local_snapmultilangnames extends behat_base {
-
     /**
      * Enables the course-level "Enable multilang names" custom field for a course
      * by writing directly to the customfield_data table.

@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component    = 'local_snapmultilangnames';
 $plugin->release      = '1.0';
-$plugin->version      = 2026022702;
+$plugin->version      = 2026022800;
 $plugin->requires     = 2024100700;
 $plugin->supported    = [405, 405];
 $plugin->maturity     = MATURITY_STABLE;

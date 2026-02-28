@@ -26,9 +26,66 @@
     @template local_snapmultilangnames/section_card
     @copyright 2026 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
     @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    Example context (json):
+    {
+        "headerlabel": "Section 1: Course Introduction",
+        "sid": 42,
+        "sectionnum": 1,
+        "components": [
+            {
+                "n": 1,
+                "spanid": "mlnc-n1-42",
+                "fieldname": "lang1_42",
+                "text": "Course Introduction",
+                "isreal": true,
+                "lang": "en",
+                "currentvalue": "en",
+                "currentlabel": "English (en)",
+                "componentlabel": "Component 1",
+                "arialabel": "Language",
+                "options": [
+                    {"value": "en", "label": "English (en)", "selected": true, "spanid": "mlnc-n1-42", "fieldname": "lang1_42"},
+                    {"value": "mi", "label": "Māori (mi)", "selected": false, "spanid": "mlnc-n1-42", "fieldname": "lang1_42"}
+                ]
+            },
+            {
+                "n": 2,
+                "spanid": "mlnc-n2-42",
+                "fieldname": "lang2_42",
+                "text": "",
+                "isreal": false,
+                "lang": "",
+                "currentvalue": "en",
+                "currentlabel": "English (en)",
+                "componentlabel": "Component 2",
+                "arialabel": "Language",
+                "options": [
+                    {"value": "en", "label": "English (en)", "selected": true, "spanid": "mlnc-n2-42", "fieldname": "lang2_42"},
+                    {"value": "mi", "label": "Māori (mi)", "selected": false, "spanid": "mlnc-n2-42", "fieldname": "lang2_42"}
+                ]
+            },
+            {
+                "n": 3,
+                "spanid": "mlnc-n3-42",
+                "fieldname": "lang3_42",
+                "text": "",
+                "isreal": false,
+                "lang": "",
+                "currentvalue": "en",
+                "currentlabel": "English (en)",
+                "componentlabel": "Component 3",
+                "arialabel": "Language",
+                "options": [
+                    {"value": "en", "label": "English (en)", "selected": true, "spanid": "mlnc-n3-42", "fieldname": "lang3_42"},
+                    {"value": "mi", "label": "Māori (mi)", "selected": false, "spanid": "mlnc-n3-42", "fieldname": "lang3_42"}
+                ]
+            }
+        ]
+    }
 }}
 <div class="card mb-3" data-section-num="{{sectionnum}}">
-    <div class="card-header py-2">{{{headerlabel}}}</div>
+    <div class="card-header py-2">{{headerlabel}}</div>
     <div class="card-body py-2">
         <div class="mlnc-form-preview flex-column" style="gap: .25em; display: inline-flex;">
             {{#components}}

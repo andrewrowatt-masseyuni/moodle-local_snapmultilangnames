@@ -7,7 +7,28 @@ Feature: Section language settings are persisted after save
     And the following "courses" exist:
       | fullname     | shortname | format |
       | Test Course  | C1        | topics |
+
     And the multilang names feature is enabled for course "C1"
+    And I change window size to "large"
+
+    Given I log in as "admin"
+
+    And I am on "Test Course" course homepage with editing mode on
+    And I edit the section "0"
+    And I set the field "name" to "Welcome | Nau mai"
+    And I press "Save changes"
+
+    And I am on "Test Course" course homepage with editing mode on
+    And I edit the section "1"
+    And I set the field "name" to "All about the course | He whakamārama"
+    And I press "Save changes"
+
+    And I am on "Test Course" course homepage with editing mode on
+    And I edit the section "2"
+    And I set the field "name" to "Ngā rauemi | Course Resources | Matériel de cours"
+    And I press "Save changes"
+
+    And I am on "Test Course" course homepage
 
   @javascript
   Scenario: Language setting for a section component is saved and displayed on reload

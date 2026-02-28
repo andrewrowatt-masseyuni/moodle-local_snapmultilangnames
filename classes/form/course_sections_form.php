@@ -39,31 +39,22 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_sections_form extends \moodleform {
-
-    /** Allowed BCP47 codes (must match the list in course_sections.php). */
-    public const ALLOWED_LANGS = ['en', 'mi', 'fr', 'zh', 'ja'];
-
     /**
-     * Returns the select options for a language dropdown.
+     * Returns the BCP47 code => label pairs from the configured language list.
      *
-     * @return array
+     * Delegates to util_sections::get_language_options() so that settings.php
+     * is the single source of truth for the available languages.
+     *
+     * @return array<string,string>
      */
     public static function lang_options(): array {
-        return [
-            'en' => get_string('lang_en', 'local_snapmultilangnames'),
-            'mi' => get_string('lang_mi', 'local_snapmultilangnames'),
-            'fr' => get_string('lang_fr', 'local_snapmultilangnames'),
-            'zh' => get_string('lang_zh', 'local_snapmultilangnames'),
-            'ja' => get_string('lang_ja', 'local_snapmultilangnames'),
-        ];
+        return \local_snapmultilangnames\util_sections::get_language_options();
     }
 
     /**
      * Build the form definition.
      */
     public function definition(): void {
-        global $PAGE;
-
         $mform    = $this->_form;
         $courseid = (int) $this->_customdata['courseid'];
         $sections = $this->_customdata['sections'];
@@ -76,9 +67,25 @@ class course_sections_form extends \moodleform {
             $mform->addElement('html', $this->render_section_card($section, $langdata));
         }
 
-        $PAGE->requires->js_call_amd('local_snapmultilangnames/course_sections_form', 'init');
-
         $this->add_action_buttons(true, get_string('savechanges'));
+    }
+
+    /**
+     * Display the form, enqueueing the AMD module with language labels.
+     *
+     * Language labels are passed from PHP so the JS does not need its own
+     * hardcoded copy; the admin setting is the single source of truth.
+     */
+    public function display(): void {
+        global $PAGE;
+
+        $PAGE->requires->js_call_amd(
+            'local_snapmultilangnames/course_sections_form',
+            'init',
+            [['langLabels' => \local_snapmultilangnames\util_sections::get_language_options()]]
+        );
+
+        parent::display();
     }
 
     /**
@@ -102,20 +109,22 @@ class course_sections_form extends \moodleform {
         $parts    = array_map('trim', explode('|', $rawname));
         $numparts = min(\count($parts), 3);
 
+        $alloptions = self::lang_options();
+        $firstlang  = array_key_first($alloptions) ?? 'en';
+
         $existing = $langdata[$sid] ?? null;
         $defaults = [
-            'lang1' => $existing->lang1 ?? 'en',
-            'lang2' => $existing->lang2 ?? 'en',
-            'lang3' => $existing->lang3 ?? 'en',
+            'lang1' => $existing->lang1 ?? $firstlang,
+            'lang2' => $existing->lang2 ?? $firstlang,
+            'lang3' => $existing->lang3 ?? $firstlang,
         ];
 
         // Card header: "Section N" or "Section N: raw name".
         $headerlabel = get_string('section_number', 'local_snapmultilangnames', $sectionnum);
         if ($rawname !== '') {
-            $headerlabel .= ': <span class="fw-normal">' . s($rawname) . '</span>';
+            $headerlabel .= ': ' . s($rawname);
         }
 
-        $alloptions = self::lang_options();
         $arialabel  = get_string('lang_label', 'local_snapmultilangnames');
         $langkeys   = ['lang1', 'lang2', 'lang3'];
 
@@ -134,7 +143,7 @@ class course_sections_form extends \moodleform {
             $lang = ($isreal && $langval !== '') ? $langval : '';
 
             // Label shown in the dropdown toggle button.
-            $currentlabel = $alloptions[$langval] ?? $alloptions['en'];
+            $currentlabel = $alloptions[$langval] ?? (array_values($alloptions)[0] ?? $langval);
 
             // Build the flat options array — spanid and fieldname are copied into each
             // option so the Mustache template can access them without a parent-context walk.
@@ -153,9 +162,9 @@ class course_sections_form extends \moodleform {
                 'n'              => $n,
                 'spanid'         => $spanid,
                 'fieldname'      => $fieldname,
-                'text'           => $text,           // Mustache {{text}} auto-escapes.
+                'text'           => $text, // Mustache {{text}} auto-escapes.
                 'isreal'         => $isreal,
-                'lang'           => $lang,           // '' (falsy) → no lang= attribute.
+                'lang'           => $lang, // Empty string (falsy) means no lang= attribute.
                 'currentvalue'   => $langval,
                 'currentlabel'   => $currentlabel,
                 'componentlabel' => get_string('component', 'local_snapmultilangnames', $n),
@@ -171,5 +180,4 @@ class course_sections_form extends \moodleform {
             'components'  => $components,
         ]);
     }
-
 }
